@@ -12,7 +12,22 @@ const register = async (req, res) => {
   const { fullname, username, password, email, phone } = req.body;
   try {
     let user = await User.findOne({ username });
-    if (user) return res.status(400).json({ message: "User already exists" });
+    if (user)
+      return res
+        .status(400)
+        .json({ message: "User already exists with this username" });
+
+    user = await User.findOne({ email });
+    if (user)
+      return res
+        .status(400)
+        .json({ message: "User already exists with this email" });
+
+    user = await User.findOne({ phone });
+    if (user)
+      return res
+        .status(400)
+        .json({ message: "User already exists with this phone number" });
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -28,6 +43,7 @@ const register = async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
+    console.error("Error in register:", error.message);
     res.status(500).json({ message: "Server error" });
   }
 };
